@@ -39,7 +39,6 @@ llm = init_chat_model(model='sonar',model_provider='perplexity')
 print("Loading Embedding Model....")
 embeddings = HuggingFaceEmbeddings(model='BAAI/bge-base-en-v1.5')
 
-os.system('cls')
 print("WORKING...")
 #Intializing the Output Parser
 output_parser = StrOutputParser()
@@ -55,6 +54,9 @@ if not pc.has_index(index_name):
         "https://www.isro.gov.in/profile.html",
         "https://www.isro.gov.in/Gaganyaan.html",
         "https://www.datacamp.com/blog/the-top-5-vector-databases",
+        "https://en.wikipedia.org/wiki/Tamil_Nadu",
+        "https://en.wikipedia.org/wiki/Nadigar_Sangam",
+        "https://en.wikipedia.org/wiki/Erode_Sengunthar_Engineering_College",
         ]
 
     web_page_id = [
@@ -64,7 +66,9 @@ if not pc.has_index(index_name):
         "main",
         "main",
         "main",
-        "skipCont"
+        "bodyContent",
+        "bodyContent",
+        "bodyContent",
         ]
 
     # loading web content
@@ -107,7 +111,7 @@ if not pc.has_index(index_name):
     document = load_document(folder_path,document) # the 'document' is the list that is defined earlier
 
     text_splitter =  RecursiveCharacterTextSplitter(
-    chunk_size = 1000,
+    chunk_size = 1500,
     chunk_overlap = 200,
     length_function = len
 )
@@ -123,7 +127,7 @@ if not pc.has_index(index_name):
         dimension=768,  # Dimension depends on your embedding model
         metric="cosine",  # cosine, euclidean, or dotproduct
         spec=ServerlessSpec(
-            cloud="aws",     # aws, gcp, or azure
+            cloud="azure",     # aws, gcp, or azure
             region="us-east-1"  # Choose closest region
         )
     )
@@ -172,15 +176,15 @@ def Rag_Chain(question):
 
     return rag_response
 
-while True:
-    os.system('cls')
-    question = input("\nAsk anyting from the document: \n")
+# while True:
+#     os.system('cls')
+#     question = input("\nAsk anyting from the document: \n")
 
-    print("\nLoading.....")
-    rag_output = Rag_Chain(question)
-    print("\nRESPONSE\n")
-    print(rag_output)
+#     print("\nLoading.....")
+#     rag_output = Rag_Chain(question)
+#     print("\nRESPONSE\n")
+#     print(rag_output)
 
-    print("Do you want to continue ?: ",end="")
-    if input().lower() == 'n':
-        break
+#     print("Do you want to continue ?: ",end="")
+#     if input().lower() == 'n':
+#         break
