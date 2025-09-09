@@ -10,7 +10,7 @@ from langchain.prompts import ChatPromptTemplate
 from huggingface_hub import login
 from prompt_template import system_prompt
 import getpass
-import os , json 
+import os 
 import bs4
 
 
@@ -134,6 +134,30 @@ if not persist_directory:
 # Retriever for retrieving the relavant documnets from the vector DB
 retriever = vector_store.as_retriever(kwargs=3)
 
+## this function is for user's to upload and query their own document
+def upload_document_vectorize(file_path,filename):
+        
+    if filename.endswith('.pdf'):
+        loader = PyPDFLoader(file_path)
+    elif filename.endswith('.docx'):
+        loader = Docx2txtLoader(file_path)
+    elif filename.endswith('.pptx'):
+        loader = UnstructuredPowerPointLoader(file_path)
+    elif filename.endswith('.txt'):
+        loader = TextLoader(file_path)
+
+    document.extend(loader.load())
+    text_splitter =  RecursiveCharacterTextSplitter(
+    chunk_size = 1500,
+    chunk_overlap = 200,
+    length_function = len
+)
+
+    splitted_docuements = text_splitter.split_documents(document)
+
+    vector_store.add_documents(documents=splitted_docuements)
+    return True
+
 # Building the RAG chain
 def Rag_Chain(question):
 
@@ -177,27 +201,5 @@ if __name__ == "__main__":
         if input().lower() == 'n':
             break
 
-## this function is for user's to upload and query their own document
-def upload_document_vectorize(file_path,filename):
-        
-    if filename.endswith('.pdf'):
-        loader = PyPDFLoader(file_path)
-    elif filename.endswith('.docx'):
-        loader = Docx2txtLoader(file_path)
-    elif filename.endswith('.pptx'):
-        loader = UnstructuredPowerPointLoader(file_path)
-    elif filename.endswith('.txt'):
-        loader = TextLoader(file_path)
 
-    document.extend(loader.load())
-    text_splitter =  RecursiveCharacterTextSplitter(
-    chunk_size = 1500,
-    chunk_overlap = 200,
-    length_function = len
-)
-
-    splitted_docuements = text_splitter.split_documents(document)
-
-    vector_store.add_documents(documents=splitted_docuements)
-    return True
 
