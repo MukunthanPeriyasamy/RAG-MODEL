@@ -21,6 +21,7 @@ load_dotenv()
 ## loading hugging face eapi key
 os.getenv('HF_TOKEN')
 
+os.getenv('LANGSMITH_TRACING')
 ## loading preplexity api key
 if not os.getenv('PPLX_API_KEY'):
     getpass.getpass("Enter the preplexity API: ")
