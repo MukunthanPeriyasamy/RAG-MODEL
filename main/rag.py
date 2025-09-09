@@ -1,7 +1,6 @@
 from langchain_community.document_loaders import PyPDFLoader , UnstructuredPowerPointLoader , Docx2txtLoader , TextLoader , WebBaseLoader
 from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_pinecone import PineconeVectorStore
-from pinecone import ServerlessSpec , Pinecone
+from langchain_chroma import Chroma
 from dotenv import load_dotenv
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chat_models import init_chat_model
@@ -14,6 +13,9 @@ import getpass
 import os , json 
 import bs4
 
+
+# pressit directory for chroma DB
+persist_directory = "./chroma_langchain_db"
 load_dotenv()
 
 ## loading hugging face eapi key
@@ -28,25 +30,24 @@ pincone_api_key = os.getenv('PINCONE_API_KEY')
 if not pincone_api_key:
     getpass.getpass("Enter the pincone API: ")
 
-## pincone index name
-index_name = "rag-embedding-collections-2"
-pc = Pinecone(api_key=pincone_api_key)
 # Loading the chat model
 print("Loading Chat Model...")
 llm = init_chat_model(model='sonar',model_provider='perplexity')
+
+#Intializing the Output Parser
+output_parser = StrOutputParser()
 
 # Loading the embedding model from the Hugging face
 print("Loading Embedding Model....")
 embeddings = HuggingFaceEmbeddings(model='BAAI/bge-base-en-v1.5')
 
 print("WORKING...")
-#Intializing the Output Parser
-output_parser = StrOutputParser()
+
 
 document = [] # list that stores all the loaded documents
 
 # Scraping the content from the Erode Sengunthar Engineering College website.
-if not pc.has_index(index_name): 
+if not persist_directory: 
     web_page = [
         "https://erode-sengunthar.ac.in/about-us/",
         "https://erode-sengunthar.ac.in/tap-vision-and-mission/tap-training/",
@@ -88,7 +89,7 @@ if not pc.has_index(index_name):
             )
 
 # loading the documents
-def load_document(folder_path,document):
+def load_and_vectorize(folder_path,document):
 
     for filename in os.listdir(folder_path):
         file_path  = os.path.join(folder_path,filename)
@@ -103,13 +104,6 @@ def load_document(folder_path,document):
             loader = TextLoader(file_path)
 
         document.extend(loader.load())
-    return document
-
-if not pc.has_index(index_name):
-    folder_path  = 'D:\\CUBE AI\\rag\\dataset'
-    print("LOADING DOCUMENT..")
-    document = load_document(folder_path,document) # the 'document' is the list that is defined earlier
-
     text_splitter =  RecursiveCharacterTextSplitter(
     chunk_size = 1500,
     chunk_overlap = 200,
@@ -118,31 +112,23 @@ if not pc.has_index(index_name):
 
     split_document = text_splitter.split_documents(document)
     print(f"Document is splitted into {len(split_document)} chunks")
+    return split_document
 
+if not persist_directory:
+    folder_path  = 'D:\\CUBE AI\\rag\\dataset'
+    print("LOADING DOCUMENT..")
+    splitted_docuement = load_and_vectorize(folder_path,document) # the 'document' is the list that is defined earlier
 
-# Loading the Vector DB
-if not pc.has_index(index_name):
-    pc.create_index(
-        name=index_name,
-        dimension=768,  # Dimension depends on your embedding model
-        metric="cosine",  # cosine, euclidean, or dotproduct
-        spec=ServerlessSpec(
-            cloud="azure",     # aws, gcp, or azure
-            region="us-east-1"  # Choose closest region
-        )
-    )
-
-index = pc.Index(name=index_name)
-
-vector_store = PineconeVectorStore(
-    index=index,
-    embedding=embeddings
+vector_store = Chroma(
+    collection_name="example_collection",
+    embedding_function=embeddings,
+    persist_directory=persist_directory,  # Where to save data locally, remove if not necessary
 )
 
 # vectorizing documents
-if not pc.has_index(index_name):
+if not persist_directory:
     print("VECTORIZING..")
-    vectorize = vector_store.add_documents(doacuments=split_document)
+    vector_store.add_documents(doacuments=splitted_docuement)
 
 # Retriever for retrieving the relavant documnets from the vector DB
 retriever = vector_store.as_retriever(kwargs=3)
@@ -176,15 +162,41 @@ def Rag_Chain(question):
 
     return rag_response
 
-# while True:
-#     os.system('cls')
-#     question = input("\nAsk anyting from the document: \n")
+if __name__ == "__main__":
+    while True:
+        os.system('cls')
+        question = input("\nAsk anyting from the document: \n")
 
-#     print("\nLoading.....")
-#     rag_output = Rag_Chain(question)
-#     print("\nRESPONSE\n")
-#     print(rag_output)
+        print("\nLoading.....")
+        rag_output = Rag_Chain(question)
+        print("\nRESPONSE\n")
+        print(rag_output)
 
-#     print("Do you want to continue ?: ",end="")
-#     if input().lower() == 'n':
-#         break
+        print("Do you want to continue ?: ",end="")
+        if input().lower() == 'n':
+            break
+
+## this function is for user's to upload and query their own document
+def upload_document_vectorize(file_path,filename):
+        
+    if filename.endswith('.pdf'):
+        loader = PyPDFLoader(file_path)
+    elif filename.endswith('.docx'):
+        loader = Docx2txtLoader(file_path)
+    elif filename.endswith('.pptx'):
+        loader = UnstructuredPowerPointLoader(file_path)
+    elif filename.endswith('.txt'):
+        loader = TextLoader(file_path)
+
+    document.extend(loader.load())
+    text_splitter =  RecursiveCharacterTextSplitter(
+    chunk_size = 1500,
+    chunk_overlap = 200,
+    length_function = len
+)
+
+    splitted_docuements = text_splitter.split_documents(document)
+
+    vector_store.add_documents(documents=splitted_docuements)
+    return True
+
