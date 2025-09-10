@@ -11,12 +11,10 @@ os.getenv('HF_TOKEN')
 
 os.getenv('LANGSMITH_TRACING')
 ## loading preplexity api key
-if not os.getenv('PPLX_API_KEY'):
-    getpass.getpass("Enter the preplexity API: ")
-
+os.getenv('GOOGLE_API_KEY')
 # Loading the chat model
 print("Loading Chat Model...")
-llm = init_chat_model(model='sonar',model_provider='perplexity')
+llm = init_chat_model(model='gemini-2.5-flash',model_provider='google_genai')
 
 # Loading the embedding model from the Hugging face
 print("Loading Embedding Model....")
