@@ -18,7 +18,6 @@ def upload_docs_and_chat(file: UploadFile = File()):
         # Save the uploaded file to a temporary file
         with open(temp_file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-        print(file.filename)
         if upload_document_vectorize(temp_file_path,file.filename):
             return HTTPException(status_code=status.HTTP_202_ACCEPTED)
     finally:
