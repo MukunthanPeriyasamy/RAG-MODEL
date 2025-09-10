@@ -1,12 +1,8 @@
-version: '3'
-
 services:
-  rag_app:
+  rag-app:
     build: .
     ports:
       - "8000:8000"
-    volumes:
-      - chroma_data:/app/chroma_langchain_db
-
-volumes:
-  chroma_data:
+    env_file:
+      - .env
+    restart: unless-stopped
