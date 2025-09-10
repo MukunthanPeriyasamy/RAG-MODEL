@@ -2,7 +2,7 @@
 from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFaceEmbeddings
 from dotenv import load_dotenv
-import os , getpass
+import os 
 load_dotenv()
 
 
@@ -11,7 +11,7 @@ os.getenv('HF_TOKEN')
 
 os.getenv('LANGSMITH_TRACING')
 ## loading preplexity api key
-os.getenv('GOOGLE_API_KEY')
+os.getenv('PPLX_API_KEY')
 # Loading the chat model
 llm = init_chat_model(model='gemini-2.5-flash',model_provider='google_genai')
 
