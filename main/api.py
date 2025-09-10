@@ -1,5 +1,6 @@
 from fastapi import FastAPI , UploadFile , File , HTTPException , status
-from rag import Rag_Chain , upload_document_vectorize
+from rag import Rag_Chain
+from vectorDB import upload_document_vectorize
 import shutil
 import os
 
