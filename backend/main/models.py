@@ -14,11 +14,6 @@ os.getenv('LANGSMITH_TRACING')
 if not os.getenv('PPLX_API_KEY'):
     getpass.getpass("Enter the preplexity API: ")
 
-## loading pincone api key
-pincone_api_key = os.getenv('PINCONE_API_KEY')
-if not pincone_api_key:
-    getpass.getpass("Enter the pincone API: ")
-
 # Loading the chat model
 print("Loading Chat Model...")
 llm = init_chat_model(model='sonar',model_provider='perplexity')
