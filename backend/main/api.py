@@ -1,6 +1,7 @@
 from fastapi import FastAPI , UploadFile , File , HTTPException , status
 from rag import Rag_Chain
 from vectorDB import upload_document_vectorize
+from models import llm 
 import shutil
 import os
 
@@ -26,6 +27,6 @@ def upload_docs_and_chat(file: UploadFile = File()):
     
 @app.get('/chat/{question}')    
 def chat_with_uploded_docs(question):
-    result = Rag_Chain(question)
+    result = Rag_Chain(question,llm)
     return result
 

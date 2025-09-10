@@ -7,7 +7,6 @@ from langchain.prompts import ChatPromptTemplate
 from prompt_template import system_prompt
 import os 
 from vectorDB import retriever
-from models import llm
 
 
 # pressit directory for chroma DB
@@ -24,7 +23,7 @@ document = []
 
 
 # Building the RAG chain
-def Rag_Chain(question):
+def Rag_Chain(question,llm):
 
     # memory = ""
 
