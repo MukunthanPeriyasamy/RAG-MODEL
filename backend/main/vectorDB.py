@@ -1,4 +1,3 @@
-import os
 from langchain_chroma import Chroma
 import os
 from langchain_community.document_loaders import WebBaseLoader , PyPDFLoader , Docx2txtLoader , TextLoader , UnstructuredPowerPointLoader
