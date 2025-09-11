@@ -11,19 +11,19 @@ app = FastAPI()
 def root():
     return 'Welcome to RAG chat'
 
-@app.post('/upload/{file_name}')
-def upload_docs_and_chat(file: UploadFile = File()):
-    temp_file_path = f"temp_{file.filename}"
-    try:
-        # Save the uploaded file to a temporary file
-        with open(temp_file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        if upload_document_vectorize(temp_file_path,file.filename):
-            return HTTPException(status_code=status.HTTP_202_ACCEPTED)
-    finally:
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
-    
+@app.post('/upload/')
+def upload_docs_and_chat(files: list[UploadFile] = File()):
+    for file in files:
+        temp_file_path = f"temp_{file.filename}"
+        try:
+            with open(temp_file_path, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+            if upload_document_vectorize(temp_file_path, file.filename):
+                return HTTPException(status_code=status.HTTP_200_OK)
+        finally:
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+
 @app.get('/chat/{question}')    
 def chat_with_uploded_docs(question):
     result = Rag_Chain(question,llm)

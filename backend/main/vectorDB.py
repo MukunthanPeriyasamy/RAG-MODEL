@@ -7,7 +7,7 @@ import bs4
 from models import embeddings
 
 
-persist_directory = "./chroma_langchain_db"
+persist_directory = "./chroma_vector_db"
 
 # if not os.path.exists(persist_directory):
 #     folder_path  = 'D:\\CUBE AI\\rag\\dataset'
