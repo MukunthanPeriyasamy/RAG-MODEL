@@ -1,6 +1,6 @@
 from langchain_chroma import Chroma
 import os
-from langchain_community.document_loaders import WebBaseLoader , PyPDFLoader , Docx2txtLoader , TextLoader , UnstructuredPowerPointLoader
+from langchain_community.document_loaders import PyPDFLoader , Docx2txtLoader , TextLoader , UnstructuredPowerPointLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import bs4
 from models import embeddings
@@ -43,6 +43,7 @@ def upload_document_vectorize(file_path,filename):
 
     vector_store.add_documents(documents=splitted_docuements)
     
+    return True
 # Retriever for retrieving the relavant documnets from the vector DB
 retriever = vector_store.as_retriever(kwargs=3)
 
