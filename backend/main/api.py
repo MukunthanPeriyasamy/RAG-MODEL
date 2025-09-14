@@ -18,10 +18,9 @@ def upload(files: list[UploadFile] = File()):
         try:
             with open(temp_file_path, "wb") as buffer:
                 shutil.copyfileobj(file.file, buffer)
-            if upload_document_vectorize(temp_file_path, file.filename):
-                return {"message": "Files uploaded and processed successfully"}
-            else:
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error processing files")
+            upload_document_vectorize(temp_file_path, file.filename)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An error occurred while processing the file {file.filename}: {str(e)}")
         finally:
             if os.path.exists(temp_file_path):
                 os.remove(temp_file_path)

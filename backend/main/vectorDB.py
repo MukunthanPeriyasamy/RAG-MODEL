@@ -2,23 +2,22 @@ from langchain_chroma import Chroma
 import os
 from langchain_community.document_loaders import PyPDFLoader , Docx2txtLoader , TextLoader , UnstructuredPowerPointLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-import bs4
+import faiss
+from langchain_community.docstore.in_memory import InMemoryDocstore
+from langchain_community.vectorstores import FAISS
 from models import embeddings
 
-
-persist_directory = "./chroma_vector_db"
-
-# if not os.path.exists(persist_directory):
-#     folder_path  = 'D:\\CUBE AI\\rag\\dataset'
-#     print("LOADING DOCUMENT..")
-#     splitted_docuement = load_and_vectorize(folder_path) # the 'document' is the list that is defined earlier
-## this function is for user's to upload and query their own document
 document = []
 
-vector_store = Chroma(
-    collection_name="example_collection",
+
+embedding_dim = len(embeddings.embed_query("hello world"))
+index = faiss.IndexFlatL2(embedding_dim)
+
+vector_store = FAISS(
     embedding_function=embeddings,
-    persist_directory=persist_directory,  # Where to save data locally, remove if not necessary
+    index=index,
+    docstore=InMemoryDocstore(),
+    index_to_docstore_id={},
 )
 
 def upload_document_vectorize(file_path,filename):
@@ -43,7 +42,6 @@ def upload_document_vectorize(file_path,filename):
 
     vector_store.add_documents(documents=splitted_docuements)
     
-    return True
 # Retriever for retrieving the relavant documnets from the vector DB
 retriever = vector_store.as_retriever(kwargs=3)
 
